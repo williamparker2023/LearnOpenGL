@@ -47,10 +47,6 @@ int main()
         0.5f, -0.5f, 0.0f,
         0.0f, 0.5f, 0.0f};
 
-    unsigned int VBO;
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
     // VERTEX SHADER
 
     const char *vertexShaderSource = "#version 330 core\n"
@@ -116,15 +112,21 @@ int main()
                   << std::endl;
     }
 
-    glUseProgram(shaderProgram);
+    // LINKING VERTEX ATTRIBUTES, VBO, VAO
 
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
+    unsigned int VAO, VBO;
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
 
-    // LINKING VERTEX ATTRIBUTES
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(verticies), verticies, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
+
+    glBindVertexArray(0);
 
     // WINDOW LOOP
 
@@ -135,9 +137,17 @@ int main()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
+        glUseProgram(shaderProgram);
+        glBindVertexArray(VAO);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
+
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
 
     glfwTerminate();
     return 0;
